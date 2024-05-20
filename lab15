@@ -1,0 +1,73 @@
+#include <stdio.h> // Подключение стандартной библиотеки ввода-вывода
+#include <string.h> // Подключение библиотеки для работы со строками
+
+// Структура для хранения данных о рейсе
+struct Flight {
+    char destination[50]; // Поле для хранения пункта назначения рейса
+    int flight_number; // Поле для хранения номера рейса
+    char plane_type[20]; // Поле для хранения типа самолета
+};
+
+// Создание и запись данных в файл Spravka.dat
+void create_spravka() {
+    FILE *file = fopen("Spravka.dat", "w"); // Открытие файла для записи
+    if (file == NULL) { // Проверка успешности открытия файла
+        printf("Failed to create file.\n"); // Вывод сообщения об ошибке
+        return; // Выход из функции в случае ошибки
+    }
+
+    struct Flight flights[] = { // Инициализация массива структур рейсов
+        {"Moscow", 101, "Boeing"}, // Первый рейс
+        {"Paris", 102, "Airbus"}, // Второй рейс
+        {"London", 103, "Boeing"}, // Третий рейс
+        {"Berlin", 104, "Airbus"}, // Четвертый рейс
+        {"New York", 105, "Boeing"} // Пятый рейс
+    };
+
+    for (int i = 0; i < sizeof(flights) / sizeof(flights[0]); i++) { // Цикл по всем рейсам
+        fprintf(file, "%s;%d;%s\n", flights[i].destination, flights[i].flight_number, flights[i].plane_type); // Запись данных в файл
+    }
+
+    fclose(file); // Закрытие файла
+}
+
+// Обработка файла Spravka.dat
+void process_spravka(const char *destination) {
+    FILE *file = fopen("Spravka.dat", "r"); // Открытие файла для чтения
+    if (file == NULL) { // Проверка успешности открытия файла
+        printf("Failed to open file.\n"); // Вывод сообщения об ошибке
+        return; // Выход из функции в случае ошибки
+    }
+
+    char line[100]; // Буфер для чтения строки из файла
+    int found = 0; // Флаг для обозначения нахождения рейса
+
+    while (fgets(line, sizeof(line), file)) { // Цикл чтения строк из файла
+        char dest[50], plane_type[20]; // Буферы для данных о рейсе
+        int flight_number; // Переменная для номера рейса
+        sscanf(line, "%[^;];%d;%s", dest, &flight_number, plane_type); // Извлечение данных из строки
+
+        if (strcmp(dest, destination) == 0) { // Сравнение пункта назначения с заданным
+            printf("Flight Number: %d, Plane Type: %s\n", flight_number, plane_type); // Вывод информации о рейсе
+            found = 1; // Установка флага нахождения рейса
+        }
+    }
+
+    if (!found) { // Если рейс не найден
+        printf("No flights found for the specified destination.\n"); // Вывод сообщения об отсутствии рейсов
+    }
+
+    fclose(file); // Закрытие файла
+}
+
+int main() {
+    create_spravka(); // Создание файла с информацией о рейсах
+
+    char destination[50]; // Буфер для ввода пункта назначения
+    printf("Enter the destination: "); // Вывод приглашения для ввода
+    scanf("%s", destination); // Считывание пункта назначения
+
+    process_spravka(destination); // Обработка информации о рейсах
+
+    return 0; // Возврат из функции main
+}
